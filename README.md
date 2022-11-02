@@ -1,17 +1,18 @@
-## My Project
+# Introduction
 
-TODO: Fill this README out!
+This device plugin enables the use of [Nitro Enclaves](https://aws.amazon.com/ec2/nitro/nitro-enclaves/)
+for your [Kubernetes](https://kubernetes.io/) cluster.
 
-Be sure to:
+# Prerequisites
+To utilize this device plugin, you will need:
 
-* Change the title in this README
-* Edit your repository description on GitHub
+  - A configured [Kubernetes](https://kubernetes.io/) cluster on EKS(https://aws.amazon.com/eks/)
+  - An Enclave enabled EC2 worker node.
+  - A working [GO](https://go.dev/doc/install) environment >= v1.18
 
-## Security
+# Usage
+TODO: Add yaml files and more explanation.
+https://github.com/aws/aws-nitro-enclaves-with-k8s
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
-
-## License
-
+# License
 This project is licensed under the Apache-2.0 License.
-
