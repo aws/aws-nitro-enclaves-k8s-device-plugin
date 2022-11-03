@@ -1,12 +1,5 @@
-#!/bin/bash
+#!/bin/bash -e
 
-ADDITIONAL_ARGS=""
-
-if [[ "$1" = "yes" ]]; then
-# Rebuild the project
-ADDITIONAL_ARGS="-a"
-fi 
-
-cd $(dirname $0)/..
-go mod init k8s-ne-device-plugin && go mod tidy && go mod vendor
-CGO_ENABLED=0 go build ${ADDITIONAL_ARGS} -ldflags='-s -w -extldflags="-static"' .
+TOP_DIR=$(dirname $(realpath $0))/..
+docker build --target builder -t ne-k8s-device-plugin-build:latest $TOP_DIR -f container/Dockerfile
+docker build --target device_plugin -t aws-nitro-enclaves-k8s-device-plugin:latest $TOP_DIR -f container/Dockerfile
