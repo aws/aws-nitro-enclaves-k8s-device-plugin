@@ -8,7 +8,7 @@ To utilize this device plugin, you will need:
 
   - A configured [Kubernetes](https://kubernetes.io/) cluster on EKS(https://aws.amazon.com/eks/)
   - An Enclave enabled EC2 worker node.
-  - A working [GO](https://go.dev/doc/install) environment >= v1.18
+  - Docker
 
 # Usage
 TODO: Add yaml files and more explanation.
