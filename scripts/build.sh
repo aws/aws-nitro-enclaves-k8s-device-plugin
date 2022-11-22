@@ -1,5 +1,8 @@
-#!/bin/bash -e
+#!/bin/bash
+# Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
-TOP_DIR=$(dirname $(realpath $0))/..
-docker build --target builder -t ne-k8s-device-plugin-build:latest $TOP_DIR -f $TOP_DIR/container/Dockerfile
-docker build --target device_plugin -t aws-nitro-enclaves-k8s-device-plugin:latest $TOP_DIR -f $TOP_DIR/container/Dockerfile
+source "$(dirname $(realpath $0))/common.sh"
+
+docker build --target builder -t $BUILDER_IMAGE $TOP_DIR -f $TOP_DIR/container/Dockerfile
+docker build --target device_plugin -t $IMAGE $TOP_DIR -f $TOP_DIR/container/Dockerfile
