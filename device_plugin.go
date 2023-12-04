@@ -20,6 +20,9 @@ import (
 const (
 	deviceName                     = "nitro_enclaves"
 	devicePluginServerReadyTimeout = 10
+	// EC2 instance with nitro_option enabled, can support upto 4 enclaves.
+	// https://docs.aws.amazon.com/enclaves/latest/user/multiple-enclaves.html
+	enclavesPerInstance = 4
 )
 
 var deviceIdCounter = 0
@@ -168,12 +171,12 @@ func (nedp *NitroEnclavesDevicePlugin) ListAndWatch(e *pluginapi.Empty, s plugin
 		case <-nedp.stop:
 			return nil
 
-		//TODO: Implement device health check.
-		/* case d := <-nedp.health:
+			//TODO: Implement device health check.
+			/* case d := <-nedp.health:
 			//TODO: Add test case to detect device state.
 			d.Health = pluginapi.Unhealthy
 			s.Send(&pluginapi.ListAndWatchResponse{Devices: nedp.dev})
-		*/
+			*/
 		}
 	}
 }
@@ -223,13 +226,20 @@ func (nedp *NitroEnclavesDevicePlugin) Stop() {
 
 // NewNitroEnclavesDevicePlugin returns an initialized NitroEnclavesDevicePlugin
 func NewNitroEnclavesDevicePlugin() *NitroEnclavesDevicePlugin {
+	// devs slice, determines the pluginapi.ListAndWatchResponse, which lets the kublet know about the available/allocatable "aws.ec2.nitro/nitro_enclaves" devices
+	// in a k8s worker node. Number of devices, in this context does not represent number of "nitro_enclaves" device files present in the host,
+	// instead it can be interpreted as number pods that can share the same host device file. The same host device file "nitro_enclaves",
+	// can be mounted into multiple pods, which can be used to run an enclave.
+	// This lets us to schedule 2 or more pods requiring nitro_enclaves device on the same k8s node/EC2 instance.
+	devs := []*pluginapi.Device{}
+	for i := 0; i < enclavesPerInstance; i++ {
+		devs = append(devs, &pluginapi.Device{
+			ID:     generateDeviceID(deviceName),
+			Health: pluginapi.Healthy,
+		})
+	}
 	return &NitroEnclavesDevicePlugin{
-		dev: []*pluginapi.Device{
-			{
-				ID:     generateDeviceID(deviceName),
-				Health: pluginapi.Healthy,
-			}},
-
+		dev:    devs,
 		pdef:   &NEPluginDefinitions{},
 		stop:   make(chan interface{}),
 		health: make(chan *pluginapi.Device),
