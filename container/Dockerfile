@@ -8,12 +8,11 @@ FROM amazonlinux:2 as builder
 RUN yum install go -y
 
 WORKDIR build_dir/
-COPY *.go ./
-COPY go.sum ./
+COPY go.mod go.sum ./
+# provide package cache for subsequent builds
+RUN go mod download
 
-RUN go mod init k8s-ne-device-plugin && \
-    go mod tidy && \
-    go mod vendor
+COPY *.go ./
 
 RUN CGO_ENABLED=0 go build -a -ldflags='-s -w -extldflags="-static"' .
 
