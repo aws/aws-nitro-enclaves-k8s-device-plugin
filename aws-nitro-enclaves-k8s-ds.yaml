@@ -32,7 +32,7 @@ spec:
       hostname: aws-nitro-enclaves-k8s-dp
       containers:
       - name: aws-nitro-enclaves-k8s-dp
-        image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:latest
+        image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:v0.2
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
