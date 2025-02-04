@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "aws-nitro-enclaves-k8s-device-plugin.fullname" . }}-aws-nitro-enclaves-k8s-daemonset
+  labels:
+    name: aws-nitro-enclaves-k8s-dp
+    role: agent
+  {{- include "aws-nitro-enclaves-k8s-device-plugin.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      name: aws-nitro-enclaves-k8s-dp
+    {{- include "aws-nitro-enclaves-k8s-device-plugin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        name: aws-nitro-enclaves-k8s-dp
+      {{- include "aws-nitro-enclaves-k8s-device-plugin.selectorLabels" . | nindent 8 }}
+      annotations:
+        node.kubernetes.io/bootstrap-checkpoint: "true"
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.repository
+          }}:{{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.tag }}
+        imagePullPolicy: {{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.imagePullPolicy
+          }}
+        name: aws-nitro-enclaves-k8s-dp
+        resources: {{- toYaml .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.resources
+          | nindent 10 }}
+        securityContext: {{- toYaml .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.containerSecurityContext
+          | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/device-plugins
+          name: device-plugin
+        - mountPath: /dev
+          name: dev-dir
+        - mountPath: /sys
+          name: sys-dir
+      hostname: aws-nitro-enclaves-k8s-dp
+      nodeSelector: {{- toYaml .Values.awsNitroEnclavesK8SDaemonset.nodeSelector | nindent
+        8 }}
+      priorityClassName: system-node-critical
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /var/lib/kubelet/device-plugins
+        name: device-plugin
+      - hostPath:
+          path: /dev
+        name: dev-dir
+      - hostPath:
+          path: /sys
+        name: sys-dir
