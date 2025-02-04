@@ -1,0 +1,21 @@
+awsNitroEnclavesK8SDaemonset:
+  awsNitroEnclavesK8SDp:
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    image:
+      repository: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin
+      tag: v0.2
+    imagePullPolicy: Always
+    resources:
+      limits:
+        cpu: 100m
+        memory: 15Mi
+      requests:
+        cpu: 10m
+        memory: 15Mi
+  nodeSelector:
+    aws-nitro-enclaves-k8s-dp: enabled
+kubernetesClusterDomain: cluster.local
