@@ -1,0 +1,23 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+## Installing the Chart
+
+Install or upgrade the `aws-nitro-enclaves-k8s-device-plugin` chart with default configuration:
+
+```bash
+$ helm upgrade my-release \
+ --install oci://public.ecr.aws/aws-nitro-enclaves/charts/{{ template "chart.name" . }} \
+ --namespace kube-system \
+ --version {{ template "chart.version" . }}
+```
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
