@@ -32,6 +32,13 @@ spec:
       hostname: aws-nitro-enclaves-k8s-dp
       containers:
       - name: aws-nitro-enclaves-k8s-dp
+        env:
+        # max 4 devices supported
+        - name: MAX_ENCLAVES_PER_NODE
+          value: "4"
+        # advertises CPUs dedicated for enclave use (offline cpus) as 'aws.ec2.nitro/nitro_enclaves_cpus'
+        - name: ENCLAVE_CPU_ADVERTISEMENT
+          value: "false"
         image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:v0.2
         imagePullPolicy: Always
         securityContext:
