@@ -36,12 +36,32 @@ func TestIncrementalDeviceIdGenerationSuccess(t *testing.T) {
 
 func TestValidateDeviceNameSuccess(t *testing.T) {
 	deviceIdCounter = 50
+	// per default limited to max 4 devices
 	p := NewNitroEnclavesDevicePlugin(&config.PluginConfig{})
 
 	expected := "nitro_enclaves_50"
 
 	if expected != p.dev[0].ID {
 		t.Fatalf("Expected %s but got invalid id: %s!", expected, p.dev[0].ID)
+		return
+	}
+}
+
+func TestValidateDeviceMaxDefaultNumber(t *testing.T) {
+	// per default limited to 4 devices
+	p := NewNitroEnclavesDevicePlugin(&config.PluginConfig{})
+
+	if len(p.dev) > 4 {
+		t.Fatalf("Expected 4 devices but got %d!", len(p.dev))
+		return
+	}
+}
+
+func TestValidateDeviceCustomNumber(t *testing.T) {
+	p := NewNitroEnclavesDevicePlugin(&config.PluginConfig{MaxEnclavesPerNode: 3})
+
+	if len(p.dev) != 3 {
+		t.Fatalf("Expected 3 devices but got %d!", len(p.dev))
 		return
 	}
 }
