@@ -21,10 +21,17 @@ spec:
     spec:
       containers:
       - env:
+        - name: MAX_ENCLAVES_PER_NODE
+          value: {{ quote .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.maxEnclavesPerNode
+            }}
+        - name: ENCLAVE_CPU_ADVERTISEMENT
+          value: {{ quote .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.enclaveCpuAdvertisement
+            }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
         image: {{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.repository
-          }}:{{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.tag }}
+          }}:{{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.tag | default
+          .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.imagePullPolicy
           }}
         name: aws-nitro-enclaves-k8s-dp

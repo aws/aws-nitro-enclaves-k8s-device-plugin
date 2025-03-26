@@ -25,6 +25,8 @@ $ helm upgrade my-release \
 |-----|------|---------|-------------|
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.enclaveCpuAdvertisement | string | `"true"` |  |
+| awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.maxEnclavesPerNode | string | `"4"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.repository | string | `"public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.tag | string | `"v0.2"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.imagePullPolicy | string | `"Always"` |  |
