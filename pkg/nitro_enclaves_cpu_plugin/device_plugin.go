@@ -8,13 +8,12 @@ import (
 	"fmt"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s-ne-device-plugin/pkg/config"
+	"k8s-ne-device-plugin/pkg/nitro_enclaves_device_monitor"
 	"net"
 	"os"
-	"os/signal"
 	"path"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/golang/glog"
@@ -31,13 +30,6 @@ const (
 
 var cpuIdCounter = 0
 
-type IBasicDevicePlugin interface {
-	Start() error
-	Stop()
-	socketPath() string
-	resourceName() string
-}
-
 // NitroEnclavesCPUDevicePlugin implements the Kubernetes device plugin API
 type NitroEnclavesCPUDevicePlugin struct {
 	devices []*pluginapi.Device
@@ -46,7 +38,8 @@ type NitroEnclavesCPUDevicePlugin struct {
 
 	server *grpc.Server
 	pluginapi.DevicePluginServer
-	IBasicDevicePlugin
+
+	nitro_enclaves_device_monitor.IBasicDevicePlugin
 }
 
 func (necdp *NitroEnclavesCPUDevicePlugin) socketPath() string {
@@ -74,7 +67,7 @@ func determineAdvisableCPUs(data string) (int, error) {
 		switch len(parts) {
 		case 1:
 			// Single CPU
-			// ensure that parts is a valid number
+			// Ensure that parts is a valid number
 			_, err := strconv.Atoi(parts[0])
 			if err != nil {
 				return 0, fmt.Errorf("invalid CPU number: %s, parsing caused error: %w", r, err)
@@ -251,12 +244,12 @@ func (necdp *NitroEnclavesCPUDevicePlugin) Start() error {
 		return err
 	}
 
-	if err = necdp.register(pluginapi.KubeletSocket, necdp.resourceName()); err != nil {
+	if err = necdp.register(pluginapi.KubeletSocket, necdp.ResourceName()); err != nil {
 		glog.Errorf("Error while registering cpu device plugin with kubelet! (Reason: %s)", err)
 		necdp.Stop()
 		return err
 	}
-	glog.V(0).Info("Registered cpu device plugin with Kubelet: ", necdp.resourceName())
+	glog.V(0).Info("Registered cpu device plugin with Kubelet: ", necdp.ResourceName())
 
 	return nil
 }
@@ -312,37 +305,5 @@ func NewNitroEnclavesCPUDevicePlugin(config *config.PluginConfig) *NitroEnclaves
 	return &NitroEnclavesCPUDevicePlugin{
 		devices: devs,
 		stop:    make(chan interface{}),
-	}
-}
-
-func (necdp *NitroEnclavesCPUDevicePlugin) Serve() error {
-	// Setup signal handling
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-
-	// Start the gRPC server
-	if err := necdp.Start(); err != nil {
-		return fmt.Errorf("failed to start device plugin: %v", err)
-	}
-
-	// watch for socket deletion or signals
-	socketPath := necdp.socketPath()
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-sigChan:
-			necdp.Stop()
-			return nil
-		case <-ticker.C:
-			if _, err := os.Stat(socketPath); err != nil {
-				glog.Info("Socket file missing, restarting plugin")
-				necdp.Stop()
-				if err := necdp.Start(); err != nil {
-					glog.Error(err)
-				}
-			}
-		}
 	}
 }

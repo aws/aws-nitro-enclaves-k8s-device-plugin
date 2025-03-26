@@ -7,6 +7,7 @@ import (
 	"errors"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s-ne-device-plugin/pkg/config"
+	"k8s-ne-device-plugin/pkg/nitro_enclaves_device_monitor"
 	"net"
 	"os"
 	"path"
@@ -29,7 +30,6 @@ var deviceIdCounter = 0
 type IPluginDefinitions interface {
 	socketPath() string
 	devicePath() string
-	resourceName() string
 }
 
 type NEPluginDefinitions struct {
@@ -44,13 +44,8 @@ func (n *NEPluginDefinitions) devicePath() string {
 	return "/dev/" + deviceName
 }
 
-func (n *NEPluginDefinitions) resourceName() string {
+func (nedp *NitroEnclavesDevicePlugin) ResourceName() string {
 	return "aws.ec2.nitro/" + deviceName
-}
-
-type IBasicDevicePlugin interface {
-	Start() error
-	Stop()
 }
 
 // NitroEnclavesDevicePlugin implements the Kubernetes device plugin API
@@ -64,7 +59,7 @@ type NitroEnclavesDevicePlugin struct {
 	server *grpc.Server
 
 	pluginapi.DevicePluginServer
-	IBasicDevicePlugin
+	nitro_enclaves_device_monitor.IBasicDevicePlugin
 }
 
 func generateDeviceID(deviceName string) string {
@@ -87,7 +82,7 @@ func (nedp *NitroEnclavesDevicePlugin) releaseResources() {
 
 // Register the device plugin with Kubelet.
 func (nedp *NitroEnclavesDevicePlugin) register(kubeletEndpoint, resourceName string) error {
-	glog.V(0).Info("Attempting to connect to kubelet...")
+	glog.V(0).Infof("Attempting %v device plugin to connect to kubelet...", nedp.ResourceName())
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -117,8 +112,7 @@ func (nedp *NitroEnclavesDevicePlugin) register(kubeletEndpoint, resourceName st
 		glog.Errorf("Couldn't connect to kubelet! (Reason: %s)", err)
 		return err
 	}
-
-	glog.V(0).Info("Connected to kubelet")
+	glog.V(0).Infof("Connected %v device plugin to kubelet", nedp.ResourceName())
 
 	client := pluginapi.NewRegistrationClient(conn)
 	_, err = client.Register(ctx, &pluginapi.RegisterRequest{
@@ -213,7 +207,7 @@ func (nedp *NitroEnclavesDevicePlugin) Start() error {
 	sock, err := net.Listen("unix", nedp.pdef.socketPath())
 
 	if err != nil {
-		glog.Error("Error while creating socket: ", nedp.pdef.socketPath())
+		glog.Errorf("Error while creating socket: %v", nedp.pdef.socketPath())
 		return err
 	}
 
@@ -233,13 +227,13 @@ func (nedp *NitroEnclavesDevicePlugin) Start() error {
 		return err
 	}
 
-	if err = nedp.register(pluginapi.KubeletSocket, nedp.pdef.resourceName()); err != nil {
+	if err = nedp.register(pluginapi.KubeletSocket, nedp.ResourceName()); err != nil {
 		glog.Errorf("Error while registering device plugin with kubelet! (Reason: %s)", err)
 		nedp.Stop()
 		return err
 	}
 
-	glog.V(0).Info("Registered device plugin with Kubelet: ", nedp.pdef.resourceName())
+	glog.V(0).Infof("Registered device plugin with Kubelet: %v", nedp.ResourceName())
 
 	return nil
 }

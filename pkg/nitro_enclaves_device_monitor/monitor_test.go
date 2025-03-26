@@ -4,14 +4,13 @@ package nitro_enclaves_device_monitor
 
 import (
 	"errors"
-	"k8s-ne-device-plugin/pkg/nitro_enclaves_device_plugin"
 	"os"
 	"testing"
 	"time"
 )
 
 type DummyDevicePlugin struct {
-	nitro_enclaves_device_plugin.IBasicDevicePlugin
+	IBasicDevicePlugin
 	startError error
 }
 
@@ -19,7 +18,11 @@ func (d *DummyDevicePlugin) Start() error {
 	return d.startError
 }
 
-func (*DummyDevicePlugin) Stop() {
+func (d *DummyDevicePlugin) Stop() {
+}
+
+func (d *DummyDevicePlugin) ResourceName() string {
+	return "aws.ec2.nitro/dummy_device"
 }
 
 func TestNoChangeOfStateAfterPluginFailsToStart(t *testing.T) {
@@ -36,8 +39,7 @@ func TestNoChangeOfStateAfterPluginFailsToStart(t *testing.T) {
 	}
 }
 
-// Whenever the Kubelet socket is recreated, the plugin
-// needs a restart.
+// Whenever the Kubelet socket is recreated, the plugin needs a restart.
 func TestIntegrationValidatePluginNeedsARestart(t *testing.T) {
 	dp := "/tmp/"
 	ksn := dp + "dummy.domain.socket"
@@ -64,7 +66,11 @@ func TestIntegrationValidatePluginNeedsARestart(t *testing.T) {
 
 	// Create a dummy socket file
 	fdesc, _ := os.Create(ksn)
-	fdesc.Close()
+
+	err := fdesc.Close()
+	if err != nil {
+		t.Logf("Error while creating dummy socket file.")
+	}
 	defer os.Remove(ksn)
 
 	// Wait for the monitor state to change.
@@ -74,7 +80,8 @@ func TestIntegrationValidatePluginNeedsARestart(t *testing.T) {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-
+	// Test requires direct access to /tmp folder.
+	// Might fail on macOS natively - run in container instead.
 	if nepm.state() != PluginRestarting {
 		t.Fatal("Socket file is generated, but the plugin didn't restart!")
 		t.FailNow()

@@ -21,24 +21,25 @@ func main() {
 	pluginConfig := config.LoadConfig()
 
 	// create nitro enclave device, pass it to monitor and start in background
-	devicePlugin := nitro_enclaves_device_plugin.NewNitroEnclavesDevicePlugin(pluginConfig)
-	monitor := nitro_enclaves_device_monitor.NewNitroEnclavesMonitor(devicePlugin)
-	if monitor == nil {
-		glog.Error("Error while initializing NE plugin monitor!")
+	enclaveDevicePlugin := nitro_enclaves_device_plugin.NewNitroEnclavesDevicePlugin(pluginConfig)
+	enclaveDeviceMonitor := nitro_enclaves_device_monitor.NewNitroEnclavesMonitor(enclaveDevicePlugin)
+	if enclaveDeviceMonitor == nil {
+		glog.Error("Error while initializing Nitro Enclave Device plugin monitor!")
 		os.Exit(1)
 	}
 
 	// create and start nitro enclave cpu device in background to advertise available cpus
 	if pluginConfig.EnclaveCPUAdvertisement {
-		go func() {
-			devicePluginCPU := nitro_enclaves_cpu_plugin.NewNitroEnclavesCPUDevicePlugin(pluginConfig)
-			if err := devicePluginCPU.Serve(); err != nil {
-				glog.Errorf("Error running the NE CPU plugin: %v", err)
-			}
-		}()
+		cpuDevicePlugin := nitro_enclaves_cpu_plugin.NewNitroEnclavesCPUDevicePlugin(pluginConfig)
+		cpuDeviceMonitor := nitro_enclaves_device_monitor.NewNitroEnclavesMonitor(cpuDevicePlugin)
+		if cpuDeviceMonitor == nil {
+			glog.Error("Error while initializing Nitro Enclave CPU Device plugin monitor!")
+			os.Exit(1)
+		}
+		go cpuDeviceMonitor.Run()
 	}
 
 	// start nitro enclave device plugin and start monitoring loop, main thread is active as long as enclave device
 	// plugin is running and healthy, otherwise terminate and have k8s restart container
-	monitor.Run()
+	enclaveDeviceMonitor.Run()
 }
