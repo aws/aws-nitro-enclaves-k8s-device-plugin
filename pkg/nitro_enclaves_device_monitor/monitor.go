@@ -4,7 +4,6 @@
 package nitro_enclaves_device_monitor
 
 import (
-	"k8s-ne-device-plugin/pkg/nitro_enclaves_device_plugin"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,7 +31,7 @@ type IPluginState interface {
 
 type NitroEnclavesPluginMonitor struct {
 	pluginState       PluginState
-	devicePlugin      nitro_enclaves_device_plugin.IBasicDevicePlugin
+	devicePlugin      IBasicDevicePlugin
 	fsWatcher         *fsnotify.Watcher
 	sigWatcher        chan os.Signal
 	devicePluginPath  string
@@ -62,7 +61,7 @@ func (nepm *NitroEnclavesPluginMonitor) setState(newState PluginState) {
 }
 
 func (nepm *NitroEnclavesPluginMonitor) Init() error {
-	glog.V(0).Info("Creating plugin monitor...")
+	glog.V(0).Infof("Creating plugin monitor for %v", nepm.devicePlugin.ResourceName())
 	nepm.setState(PluginIdle)
 
 	var err error
@@ -97,7 +96,7 @@ func run(nepm *NitroEnclavesPluginMonitor) bool {
 	}
 
 	nepm.setState(PluginRunning)
-	glog.V(0).Infof("New plugin state is: %v.", nepm.state())
+	glog.V(0).Infof("%v plugin state is: %v.", nepm.devicePlugin.ResourceName(), nepm.state())
 
 L:
 	select {
@@ -132,8 +131,14 @@ func (nepm *NitroEnclavesPluginMonitor) Run() {
 	}
 }
 
+type IBasicDevicePlugin interface {
+	Start() error
+	Stop()
+	ResourceName() string
+}
+
 // Create a new plugin monitor.
-func NewNitroEnclavesMonitor(nedp *nitro_enclaves_device_plugin.NitroEnclavesDevicePlugin) *NitroEnclavesPluginMonitor {
+func NewNitroEnclavesMonitor(nedp IBasicDevicePlugin) *NitroEnclavesPluginMonitor {
 	nepm := &NitroEnclavesPluginMonitor{
 		devicePlugin:      nedp,
 		devicePluginPath:  pluginapi.DevicePluginPath,
