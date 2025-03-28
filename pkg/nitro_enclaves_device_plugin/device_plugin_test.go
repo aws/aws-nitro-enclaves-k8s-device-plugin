@@ -3,6 +3,7 @@
 package nitro_enclaves_device_plugin
 
 import (
+	"k8s-ne-device-plugin/pkg/config"
 	"testing"
 )
 
@@ -35,7 +36,7 @@ func TestIncrementalDeviceIdGenerationSuccess(t *testing.T) {
 
 func TestValidateDeviceNameSuccess(t *testing.T) {
 	deviceIdCounter = 50
-	p := NewNitroEnclavesDevicePlugin()
+	p := NewNitroEnclavesDevicePlugin(&config.PluginConfig{})
 
 	expected := "nitro_enclaves_50"
 
