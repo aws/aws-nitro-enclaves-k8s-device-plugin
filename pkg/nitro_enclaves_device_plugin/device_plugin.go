@@ -5,6 +5,8 @@ package nitro_enclaves_device_plugin
 
 import (
 	"errors"
+	"google.golang.org/grpc/credentials/insecure"
+	"k8s-ne-device-plugin/pkg/config"
 	"net"
 	"os"
 	"path"
@@ -20,9 +22,6 @@ import (
 const (
 	deviceName                     = "nitro_enclaves"
 	devicePluginServerReadyTimeout = 10
-	// EC2 instance with nitro_option enabled, can support upto 4 enclaves.
-	// https://docs.aws.amazon.com/enclaves/latest/user/multiple-enclaves.html
-	enclavesPerInstance = 4
 )
 
 var deviceIdCounter = 0
@@ -73,32 +72,56 @@ func generateDeviceID(deviceName string) string {
 	deviceIdCounter++
 	return deviceName + "_" + strconv.Itoa(ctr)
 }
+
 func (nedp *NitroEnclavesDevicePlugin) releaseResources() {
 	nedp.server = nil
-	os.Remove(nedp.pdef.socketPath())
+	// check if socketPath does exist and delete otherwise do nothing
+	_, err := os.Stat(nedp.pdef.socketPath())
+	if err == nil {
+		err = os.Remove(nedp.pdef.socketPath())
+		if err != nil {
+			glog.Errorf("Error removing socket file: %s", err)
+		}
+	}
 }
 
 // Register the device plugin with Kubelet.
 func (nedp *NitroEnclavesDevicePlugin) register(kubeletEndpoint, resourceName string) error {
 	glog.V(0).Info("Attempting to connect to kubelet...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	conn, err := grpc.Dial(kubeletEndpoint, grpc.WithInsecure(), grpc.WithBlock(),
-		grpc.WithTimeout(10*time.Second),
-		grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
-			return net.DialTimeout("unix", addr, timeout)
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		//lint:ignore SA1019 grpc.WithBlock is deprecated, not supported by grpc.NewClient
+		grpc.WithBlock(),
+		grpc.WithContextDialer(func(ctx context.Context, addr string) (net.Conn, error) {
+			return net.DialUnix("unix", nil, &net.UnixAddr{Name: addr, Net: "unix"})
 		}),
+	}
+
+	//lint:ignore SA1019 grpc.DialContext is deprecated // todo replace by grpc.NewClient
+	conn, err := grpc.DialContext(
+		ctx,
+		kubeletEndpoint,
+		opts...,
 	)
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			glog.Errorf("Error closing connection to kubelet: %s", err)
+		}
+	}(conn)
 
 	if err != nil {
 		glog.Errorf("Couldn't connect to kubelet! (Reason: %s)", err)
 		return err
 	}
 
-	glog.V(0).Info("Connected to kubelet.")
+	glog.V(0).Info("Connected to kubelet")
 
-	defer conn.Close()
 	client := pluginapi.NewRegistrationClient(conn)
-	_, err = client.Register(context.Background(), &pluginapi.RegisterRequest{
+	_, err = client.Register(ctx, &pluginapi.RegisterRequest{
 		Version:      pluginapi.Version,
 		Endpoint:     path.Base(nedp.pdef.socketPath()),
 		ResourceName: resourceName,
@@ -117,7 +140,7 @@ func (nedp *NitroEnclavesDevicePlugin) waitForServerReady(timeout int) error {
 		time.Sleep(time.Second)
 	}
 
-	return errors.New("gRPC server initialization timed out!")
+	return errors.New("gRPC server initialization timed out")
 }
 
 // Allocate is called during container creation so that the Device
@@ -147,7 +170,7 @@ func (nedp *NitroEnclavesDevicePlugin) Allocate(ctx context.Context, reqs *plugi
 }
 
 // GetDevicePluginOptions returns options to be communicated with Device Manager.
-func (*NitroEnclavesDevicePlugin) GetDevicePluginOptions(context.Context, *pluginapi.Empty) (*pluginapi.DevicePluginOptions, error) {
+func (nedp *NitroEnclavesDevicePlugin) GetDevicePluginOptions(context.Context, *pluginapi.Empty) (*pluginapi.DevicePluginOptions, error) {
 	return &pluginapi.DevicePluginOptions{}, nil
 }
 
@@ -164,7 +187,10 @@ func (*NitroEnclavesDevicePlugin) GetPreferredAllocation(context.Context, *plugi
 // Whenever a Device state change or a Device disappears, ListAndWatch
 // returns the new list
 func (nedp *NitroEnclavesDevicePlugin) ListAndWatch(e *pluginapi.Empty, s pluginapi.DevicePlugin_ListAndWatchServer) error {
-	s.Send(&pluginapi.ListAndWatchResponse{Devices: nedp.dev})
+	err := s.Send(&pluginapi.ListAndWatchResponse{Devices: nedp.dev})
+	if err != nil {
+		return err
+	}
 
 	//TODO: Device health check goes here
 	<-nedp.stop
@@ -172,10 +198,10 @@ func (nedp *NitroEnclavesDevicePlugin) ListAndWatch(e *pluginapi.Empty, s plugin
 
 }
 
-// PreStartContainer is called, if indicated by Device Plugin during registeration phase,
+// PreStartContainer is called, if indicated by Device Plugin during registration phase,
 // before each container start. Device plugin can run device specific operations
 // such as resetting the device before making devices available to the container.
-func (m *NitroEnclavesDevicePlugin) PreStartContainer(context.Context, *pluginapi.PreStartContainerRequest) (*pluginapi.PreStartContainerResponse, error) {
+func (nedp *NitroEnclavesDevicePlugin) PreStartContainer(context.Context, *pluginapi.PreStartContainerRequest) (*pluginapi.PreStartContainerResponse, error) {
 	return &pluginapi.PreStartContainerResponse{}, nil
 }
 
@@ -193,16 +219,28 @@ func (nedp *NitroEnclavesDevicePlugin) Start() error {
 
 	nedp.server = grpc.NewServer([]grpc.ServerOption{}...)
 	pluginapi.RegisterDevicePluginServer(nedp.server, nedp)
-	go nedp.server.Serve(sock)
-	nedp.waitForServerReady(devicePluginServerReadyTimeout)
+	go func() {
+		err := nedp.server.Serve(sock)
+		if err != nil {
+			if nedp.stop != nil {
+				glog.Errorf("Error while serving device plugin: %v", err)
+				close(nedp.stop)
+			}
+		}
+	}()
+	err = nedp.waitForServerReady(devicePluginServerReadyTimeout)
+	if err != nil {
+		return err
+	}
 
-	if err := nedp.register(pluginapi.KubeletSocket, nedp.pdef.resourceName()); err != nil {
+	if err = nedp.register(pluginapi.KubeletSocket, nedp.pdef.resourceName()); err != nil {
 		glog.Errorf("Error while registering device plugin with kubelet! (Reason: %s)", err)
 		nedp.Stop()
 		return err
 	}
 
 	glog.V(0).Info("Registered device plugin with Kubelet: ", nedp.pdef.resourceName())
+
 	return nil
 }
 
@@ -216,19 +254,28 @@ func (nedp *NitroEnclavesDevicePlugin) Stop() {
 }
 
 // NewNitroEnclavesDevicePlugin returns an initialized NitroEnclavesDevicePlugin
-func NewNitroEnclavesDevicePlugin() *NitroEnclavesDevicePlugin {
-	// devs slice, determines the pluginapi.ListAndWatchResponse, which lets the kublet know about the available/allocatable "aws.ec2.nitro/nitro_enclaves" devices
+func NewNitroEnclavesDevicePlugin(config *config.PluginConfig) *NitroEnclavesDevicePlugin {
+
+	if err := config.Validate(); err != nil {
+		glog.Errorf("invalid plugin config: %v", err)
+	}
+
+	glog.V(0).Infof("Initializing Nitro Enclaves device plugin with following params: %v", config)
+
+	// devs slice, determines the pluginapi.ListAndWatchResponse, which lets the kubelet know about the available/allocatable "aws.ec2.nitro/nitro_enclaves" devices
 	// in a k8s worker node. Number of devices, in this context does not represent number of "nitro_enclaves" device files present in the host,
 	// instead it can be interpreted as number pods that can share the same host device file. The same host device file "nitro_enclaves",
 	// can be mounted into multiple pods, which can be used to run an enclave.
-	// This lets us to schedule 2 or more pods requiring nitro_enclaves device on the same k8s node/EC2 instance.
+	// This lets us schedule 2 or more pods requiring nitro_enclaves device on the same k8s node/EC2 instance.
 	devs := []*pluginapi.Device{}
-	for i := 0; i < enclavesPerInstance; i++ {
+	for i := 0; i < config.MaxEnclavesPerNode; i++ {
 		devs = append(devs, &pluginapi.Device{
 			ID:     generateDeviceID(deviceName),
 			Health: pluginapi.Healthy,
 		})
 	}
+	glog.V(0).Infof("Enclave devices added: %v", config.MaxEnclavesPerNode)
+
 	return &NitroEnclavesDevicePlugin{
 		dev:    devs,
 		pdef:   &NEPluginDefinitions{},
