@@ -1,7 +1,7 @@
 // Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package main
+package nitro_enclaves_device_plugin
 
 import (
 	"errors"
@@ -166,19 +166,10 @@ func (*NitroEnclavesDevicePlugin) GetPreferredAllocation(context.Context, *plugi
 func (nedp *NitroEnclavesDevicePlugin) ListAndWatch(e *pluginapi.Empty, s pluginapi.DevicePlugin_ListAndWatchServer) error {
 	s.Send(&pluginapi.ListAndWatchResponse{Devices: nedp.dev})
 
-	for {
-		select {
-		case <-nedp.stop:
-			return nil
+	//TODO: Device health check goes here
+	<-nedp.stop
+	return nil
 
-			//TODO: Implement device health check.
-			/* case d := <-nedp.health:
-			//TODO: Add test case to detect device state.
-			d.Health = pluginapi.Unhealthy
-			s.Send(&pluginapi.ListAndWatchResponse{Devices: nedp.dev})
-			*/
-		}
-	}
 }
 
 // PreStartContainer is called, if indicated by Device Plugin during registeration phase,

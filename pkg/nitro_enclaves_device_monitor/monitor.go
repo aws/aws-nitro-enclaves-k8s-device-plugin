@@ -1,9 +1,10 @@
 // Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package main
+package nitro_enclaves_device_monitor
 
 import (
+	"k8s-ne-device-plugin/pkg/nitro_enclaves_device_plugin"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,7 +32,7 @@ type IPluginState interface {
 
 type NitroEnclavesPluginMonitor struct {
 	pluginState       PluginState
-	devicePlugin      IBasicDevicePlugin
+	devicePlugin      nitro_enclaves_device_plugin.IBasicDevicePlugin
 	fsWatcher         *fsnotify.Watcher
 	sigWatcher        chan os.Signal
 	devicePluginPath  string
@@ -132,7 +133,7 @@ func (nepm *NitroEnclavesPluginMonitor) Run() {
 }
 
 // Create a new plugin monitor.
-func NewNitroEnclavesMonitor(nedp *NitroEnclavesDevicePlugin) *NitroEnclavesPluginMonitor {
+func NewNitroEnclavesMonitor(nedp *nitro_enclaves_device_plugin.NitroEnclavesDevicePlugin) *NitroEnclavesPluginMonitor {
 	nepm := &NitroEnclavesPluginMonitor{
 		devicePlugin:      nedp,
 		devicePluginPath:  pluginapi.DevicePluginPath,

@@ -1,6 +1,6 @@
 // Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-package main
+package nitro_enclaves_device_plugin
 
 import (
 	"testing"
