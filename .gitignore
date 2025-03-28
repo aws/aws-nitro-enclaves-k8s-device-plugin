@@ -1,3 +1,5 @@
 .ecr.uri
 k8s-ne-device-plugin
 vendor/
+*.tgz
+.DS_Store
