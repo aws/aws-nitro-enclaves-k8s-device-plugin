@@ -1,16 +1,17 @@
 // Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-package main
+package nitro_enclaves_device_monitor
 
 import (
 	"errors"
+	"k8s-ne-device-plugin/pkg/nitro_enclaves_device_plugin"
 	"os"
 	"testing"
 	"time"
 )
 
 type DummyDevicePlugin struct {
-	IBasicDevicePlugin
+	nitro_enclaves_device_plugin.IBasicDevicePlugin
 	startError error
 }
 
