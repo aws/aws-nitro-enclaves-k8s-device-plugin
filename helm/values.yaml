@@ -6,7 +6,7 @@ awsNitroEnclavesK8SDaemonset:
         drop:
         - ALL
     env:
-      enclaveCpuAdvertisement: "true"
+      enclaveCpuAdvertisement: "false"
       maxEnclavesPerNode: "4"
     image:
       repository: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin
