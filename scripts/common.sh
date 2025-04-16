@@ -84,6 +84,24 @@ is_a_public_ecr_registry() {
   return $FAILURE
 }
 
+_helm_login() {
+  is_a_public_ecr_registry
+
+  if [[ $? -eq $SUCCESS ]]; then
+    aws ecr-public get-login-password --region "$ECR_REGION" | helm registry login --username AWS --password-stdin $ECR_URL
+  else
+    aws ecr get-login-password --region "$ECR_REGION" | helm registry login --username AWS --password-stdin $ECR_URL
+  fi
+}
+
+# Loads configuration and logs in to a Helm registry.
+#
+helm_login() {
+  _load_ecr_config || die "Error while loading configuration file!"
+  say "Using ECR registry url: $ECR_URL. (region: $ECR_REGION)."
+  _helm_login || die "Failed to log in to the ECR registry."
+}
+
 # Generic user confirmation function
 # 
 confirm() {
