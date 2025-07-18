@@ -49,6 +49,10 @@ spec:
       hostname: aws-nitro-enclaves-k8s-dp
       nodeSelector: {{- toYaml .Values.awsNitroEnclavesK8SDaemonset.nodeSelector | nindent
         8 }}
+      {{- if .Values.awsNitroEnclavesK8SDaemonset.tolerations }}
+      tolerations: {{- toYaml .Values.awsNitroEnclavesK8SDaemonset.tolerations | nindent 
+        8 }}
+      {{- end }}  
       priorityClassName: system-node-critical
       terminationGracePeriodSeconds: 30
       volumes:

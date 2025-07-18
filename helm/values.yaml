@@ -21,4 +21,5 @@ awsNitroEnclavesK8SDaemonset:
         memory: 15Mi
   nodeSelector:
     aws-nitro-enclaves-k8s-dp: enabled
+  tolerations: []
 kubernetesClusterDomain: cluster.local
