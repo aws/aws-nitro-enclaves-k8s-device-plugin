@@ -2,7 +2,7 @@
 
 A Helm chart for aws-nitro-enclaves-k8s-device-plugin daemon set to provide AWS Nitro Enclave support to Kubernetes
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.3.1](https://img.shields.io/badge/AppVersion-0.3.1-informational?style=flat-square)
 
 ## Source Code
 
@@ -16,7 +16,7 @@ Install or upgrade the `aws-nitro-enclaves-k8s-device-plugin` chart with default
 $ helm upgrade my-release \
  --install oci://public.ecr.aws/aws-nitro-enclaves/charts/aws-nitro-enclaves-k8s-device-plugin \
  --namespace kube-system \
- --version 0.2.0
+ --version 0.3.1
 ```
 
 ## Values
@@ -25,16 +25,17 @@ $ helm upgrade my-release \
 |-----|------|---------|-------------|
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
-| awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.enclaveCpuAdvertisement | string | `"true"` |  |
+| awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.enclaveCpuAdvertisement | string | `"false"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.env.maxEnclavesPerNode | string | `"4"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.repository | string | `"public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin"` |  |
-| awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.tag | string | `"v0.2"` |  |
+| awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.image.tag | string | `"0.3.1"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.imagePullPolicy | string | `"Always"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.resources.limits.cpu | string | `"100m"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.resources.limits.memory | string | `"15Mi"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.resources.requests.cpu | string | `"10m"` |  |
 | awsNitroEnclavesK8SDaemonset.awsNitroEnclavesK8SDp.resources.requests.memory | string | `"15Mi"` |  |
 | awsNitroEnclavesK8SDaemonset.nodeSelector.aws-nitro-enclaves-k8s-dp | string | `"enabled"` |  |
+| awsNitroEnclavesK8SDaemonset.tolerations | list | `[]` |  |
 | kubernetesClusterDomain | string | `"cluster.local"` |  |
 
 ----------------------------------------------
