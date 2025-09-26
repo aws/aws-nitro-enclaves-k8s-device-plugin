@@ -8,10 +8,10 @@ helm lint $TOP_DIR/helm && helm package $TOP_DIR/helm ||
 
 # assert that packaged file is located in directory
 # its best practice to manage helm version and app relase version independent from each other
-# VERSION is sourced from packed RELEASE veriable and HELM versions are based on Chart.yaml values
-if [[ ! -f $TOP_DIR/aws-nitro-enclaves-k8s-device-plugin-$VERSION.tgz ]]; then
+# RELEASE variable is based on RELEASE file and HELM versions are based on Chart.yaml values
+if [[ ! -f $TOP_DIR/aws-nitro-enclaves-k8s-device-plugin-$RELEASE.tgz ]]; then
     die "Packaged file not found in $TOP_DIR directory"
 fi
 
 # change name of standard HELM archive to explicitly state that it is a packaged chart
-mv aws-nitro-enclaves-k8s-device-plugin-$VERSION.tgz $HELM_CHART
+mv aws-nitro-enclaves-k8s-device-plugin-$RELEASE.tgz $HELM_CHART

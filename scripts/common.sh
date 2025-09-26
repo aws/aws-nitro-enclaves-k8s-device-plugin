@@ -13,9 +13,8 @@ readonly RELEASE_FILE="RELEASE"
 readonly BUILDER_IMAGE=ne-k8s-device-plugin-build:latest
 readonly REPOSITORY_NAME=aws-nitro-enclaves-k8s-device-plugin
 readonly RELEASE=$(cat $TOP_DIR/$RELEASE_FILE)
-readonly VERSION="$(echo $RELEASE | cut -c 2-).0"
 readonly IMAGE=$REPOSITORY_NAME:$RELEASE
-readonly HELM_CHART="aws-nitro-enclaves-k8s-device-plugin-chart-$VERSION.tgz"
+readonly HELM_CHART="aws-nitro-enclaves-k8s-device-plugin-chart-$RELEASE.tgz"
 
 say() {
   echo "$@"
