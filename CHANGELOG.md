@@ -2,6 +2,17 @@
 
 All notable changes to the AWS Nitro Enclaves Kubernetes Device Plugin will be documented in this file.
 
+## [v0.3.1] - 07/18/2025
+
+### Added
+- Support for specifying DaemonSet tolerations via Helm values ([aebfd0c](https://github.com/aws/aws-nitro-enclaves-k8s-device-plugin/commit/aebfd0c))
+
+### Changed
+- Renamed scripts/pipeline.sh to scripts/release.sh for better clarity ([eae0a9e](https://github.com/aws/aws-nitro-enclaves-k8s-device-plugin/commit/eae0a9e))
+- Removed `v` prefix from docker image tag for consistency ([ca16d51](https://github.com/aws/aws-nitro-enclaves-k8s-device-plugin/commit/ca16d51))
+- Updated Helm chart version to 0.3.1
+- Updated app version to 0.3.1
+
 ## [v0.3] - 04/24/2025
 
 ### Added
