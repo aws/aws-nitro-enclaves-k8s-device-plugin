@@ -16,7 +16,7 @@ main() {
       "Are you sure you want to continue?"
   }
   say "Pushing $HELM_CHART to $ECR_HELM_URL..."
-  helm push aws-nitro-enclaves-k8s-device-plugin-chart-$VERSION.tgz oci://$ECR_HELM_URL ||
+  helm push aws-nitro-enclaves-k8s-device-plugin-chart-$RELEASE.tgz oci://$ECR_HELM_URL ||
     die "Failed to push $HELM_CHART to $ECR_HELM_URL."
 }
 
