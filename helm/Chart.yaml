@@ -2,7 +2,7 @@ apiVersion: v2
 name: aws-nitro-enclaves-k8s-device-plugin
 description: A Helm chart for aws-nitro-enclaves-k8s-device-plugin daemon set to provide AWS Nitro Enclave support to Kubernetes
 type: application
-version: 0.3.1
-appVersion: "0.3.1"
+version: 0.4.0
+appVersion: "0.4.0"
 sources: ["https://github.com/aws/aws-nitro-enclaves-with-k8s"]
 icon: https://d3g9o9u8re44ak.cloudfront.net/logo/f9feca19-5e84-465f-9d3a-ce348d996b61/3301cc66-e044-48e8-ac9e-1496f4103b01.png
