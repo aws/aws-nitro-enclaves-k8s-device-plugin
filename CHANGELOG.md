@@ -2,6 +2,27 @@
 
 All notable changes to the AWS Nitro Enclaves Kubernetes Device Plugin will be documented in this file.
 
+## [v0.4.0] - 11/26/2025
+
+### Changed
+- Upgraded base image from Amazon Linux 2 to Amazon Linux 2023 for extended support
+- Updated Go toolchain from 1.22.7 to 1.24.0 with toolchain 1.24.9
+- Updated Helm chart version to 0.4.0
+- Updated app version to 0.4.0
+
+### Dependencies
+- Upgraded k8s.io/kubelet from v0.25.3 to v0.30.14 (LTS)
+- Upgraded google.golang.org/grpc from v1.64.1 to v1.75.0
+- Upgraded golang.org/x/net from v0.33.0 to v0.47.0
+- Upgraded golang.org/x/sys from v0.30.0 to v0.38.0
+- Upgraded golang.org/x/text from v0.22.0 to v0.31.0
+- Upgraded google.golang.org/protobuf from v1.33.0 to v1.36.10
+- Upgraded github.com/fsnotify/fsnotify from v1.6.0 to v1.8.0
+- Upgraded github.com/golang/glog from v1.2.4 to v1.2.5
+
+### Fixed
+- Fixed typo in Dockerfile comment: "minumum" → "minimum"
+
 ## [v0.3.1] - 07/18/2025
 
 ### Added

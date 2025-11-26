@@ -39,7 +39,7 @@ spec:
         # advertises CPUs dedicated for enclave use (offline cpus) as 'aws.ec2.nitro/nitro_enclaves_cpus'
         - name: ENCLAVE_CPU_ADVERTISEMENT
           value: "false"
-        image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:0.3.1
+        image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:0.4.0
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
