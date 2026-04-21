@@ -14,10 +14,12 @@ tag_and_push_docker_image() {
 main() {
   ecr_login
 
-  aws ecr-public --region $ECR_REGION describe-repositories \
-    --repository-names "$REPOSITORY_NAME" >/dev/null ||
-    die "There is no repository named $REPOSITORY_NAME in" \
-      "$ECR_REGION region."
+  if ! is_non_interactive; then
+    aws ecr-public --region $ECR_REGION describe-repositories \
+      --repository-names "$REPOSITORY_NAME" >/dev/null ||
+      die "There is no repository named $REPOSITORY_NAME in" \
+        "$ECR_REGION region."
+  fi
 
   is_a_public_ecr_registry && {
     confirm "You are about to push $RELEASE docker images on a public repository." \

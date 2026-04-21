@@ -4,7 +4,7 @@ awsNitroEnclavesK8SDaemonset:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
-        - ALL
+          - ALL
     env:
       enclaveCpuAdvertisement: "false"
       maxEnclavesPerNode: "4"

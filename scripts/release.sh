@@ -2,6 +2,20 @@
 # Copyright 2025 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 set -e
+
+for arg in "$@"; do
+  case $arg in
+    --non-interactive)
+      export NE_NON_INTERACTIVE=true
+      ;;
+    *)
+      echo "[ERROR] Unknown flag: $arg" >&2
+      echo "Usage: $0 [--non-interactive]" >&2
+      exit 1
+      ;;
+  esac
+done
+
 source "$(dirname $(realpath $0))/common.sh"
 current_folder="$(dirname $(realpath $0))"
 
