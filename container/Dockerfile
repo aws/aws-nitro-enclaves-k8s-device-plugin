@@ -4,7 +4,7 @@
 # Build the device plugin from sources
 FROM amazonlinux:2023 as builder
 
-RUN dnf install golang-1.26.2 -y
+RUN dnf install golang-1.25.8 -y
 
 WORKDIR build_dir/
 COPY go.mod go.sum ./
@@ -12,8 +12,6 @@ COPY pkg ./pkg
 COPY cmd ./cmd
 # provide package cache for subsequent builds
 RUN go mod download
-
-COPY *.go ./
 
 RUN CGO_ENABLED=0 go build -a -ldflags='-s -w -extldflags="-static"' -o k8s-ne-device-plugin ./cmd/k8s-device-plugin
 
