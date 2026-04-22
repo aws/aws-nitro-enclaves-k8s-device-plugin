@@ -10,7 +10,7 @@ awsNitroEnclavesK8SDaemonset:
       maxEnclavesPerNode: "4"
     image:
       repository: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin
-      tag: 0.4.0
+      tag: 0.4.1
     imagePullPolicy: Always
     resources:
       limits:
