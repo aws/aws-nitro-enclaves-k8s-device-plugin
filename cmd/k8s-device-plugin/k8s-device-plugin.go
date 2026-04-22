@@ -5,6 +5,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/golang/glog"
 	"k8s-ne-device-plugin/pkg/config"
 	"k8s-ne-device-plugin/pkg/nitro_enclaves_cpu_plugin"
@@ -13,9 +14,23 @@ import (
 	"os"
 )
 
+// These variables are populated at build time via -ldflags -X.
+// Defaults apply when building without version injection (e.g. plain `go build`).
+var (
+	version   = "dev"
+	buildDate = "unknown"
+)
+
 func main() {
+	showVersion := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
-	glog.V(0).Info("Loading K8s Nitro Enclaves device plugin...")
+
+	if *showVersion {
+		fmt.Printf("k8s-ne-device-plugin version %s (built: %s)\n", version, buildDate)
+		os.Exit(0)
+	}
+
+	glog.V(0).Infof("Starting K8s Nitro Enclaves device plugin %s (built: %s)", version, buildDate)
 
 	// load config from manifest file and validate
 	pluginConfig := config.LoadConfig()
