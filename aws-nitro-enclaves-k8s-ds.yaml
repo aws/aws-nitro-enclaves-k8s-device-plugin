@@ -31,34 +31,34 @@ spec:
       priorityClassName: "system-node-critical"
       hostname: aws-nitro-enclaves-k8s-dp
       containers:
-      - name: aws-nitro-enclaves-k8s-dp
-        env:
-        # max 4 devices supported
-        - name: MAX_ENCLAVES_PER_NODE
-          value: "4"
-        # advertises CPUs dedicated for enclave use (offline cpus) as 'aws.ec2.nitro/nitro_enclaves_cpus'
-        - name: ENCLAVE_CPU_ADVERTISEMENT
-          value: "false"
-        image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:0.4.0
-        imagePullPolicy: Always
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop: ["ALL"]
-        resources:
-          limits:
-            cpu: 100m
-            memory: 15Mi
-          requests:
-            cpu: 10m
-            memory: 15Mi
-        volumeMounts:
-          - name: device-plugin
-            mountPath: /var/lib/kubelet/device-plugins
-          - name: dev-dir
-            mountPath: /dev
-          - name: sys-dir
-            mountPath: /sys
+        - name: aws-nitro-enclaves-k8s-dp
+          env:
+            # max 4 devices supported
+            - name: MAX_ENCLAVES_PER_NODE
+              value: "4"
+            # advertises CPUs dedicated for enclave use (offline cpus) as 'aws.ec2.nitro/nitro_enclaves_cpus'
+            - name: ENCLAVE_CPU_ADVERTISEMENT
+              value: "false"
+          image: public.ecr.aws/aws-nitro-enclaves/aws-nitro-enclaves-k8s-device-plugin:0.4.1
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            limits:
+              cpu: 100m
+              memory: 15Mi
+            requests:
+              cpu: 10m
+              memory: 15Mi
+          volumeMounts:
+            - name: device-plugin
+              mountPath: /var/lib/kubelet/device-plugins
+            - name: dev-dir
+              mountPath: /dev
+            - name: sys-dir
+              mountPath: /sys
       volumes:
         - name: device-plugin
           hostPath:

@@ -109,9 +109,18 @@ is_a_public_ecr_registry() {
   return $FAILURE
 }
 
+# Check if running in non-interactive mode.
+# Accepts NE_NON_INTERACTIVE values: 1, true, yes (case-sensitive).
+#
+is_non_interactive() {
+  case "$NE_NON_INTERACTIVE" in 1|true|yes) return $SUCCESS ;; esac
+  return $FAILURE
+}
+
 # Generic user confirmation function
 #
 confirm() {
+  is_non_interactive && return 0
   echo -n "$@ (yes/no): "
   read yn
   case $yn in

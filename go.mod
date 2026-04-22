@@ -2,7 +2,7 @@ module k8s-ne-device-plugin
 
 go 1.25.0
 
-toolchain go1.26.2
+toolchain go1.25.8
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0

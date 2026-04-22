@@ -2,6 +2,30 @@
 
 All notable changes to the AWS Nitro Enclaves Kubernetes Device Plugin will be documented in this file.
 
+## [v0.4.1] - 04/22/2026
+
+### Added
+- Build-time version injection via `-ldflags -X`, using the `RELEASE` file as the single source of truth
+- `-version` CLI flag to print the plugin version and build date
+- Startup log line now includes the plugin version and build date
+- Non-interactive release workflow: `NE_NON_INTERACTIVE` environment variable and `--non-interactive` flag on `release.sh` to skip `confirm()` prompts
+- `scripts/bump_version.sh` to propagate the `RELEASE` version and ECR registry URL to `Chart.yaml`, `values.yaml`, and the DaemonSet manifest in a single call
+
+### Changed
+- Updated Go toolchain from 1.24.9 to 1.25.8
+- `push_docker.sh` and `push_helm.sh` gracefully skip ECR repository existence checks when running non-interactively
+- Normalized DaemonSet YAML formatting for `yq` compatibility
+- Updated Helm chart version to 0.4.1
+- Updated app version to 0.4.1
+
+### Dependencies
+- Upgraded k8s.io/kubelet from v0.30.14 to v0.33.10
+- Upgraded google.golang.org/grpc from v1.75.0 to v1.79.3
+- Upgraded golang.org/x/net from v0.47.0 to v0.52.0
+- Upgraded golang.org/x/sys from v0.38.0 to v0.43.0
+- Upgraded golang.org/x/text from v0.31.0 to v0.35.0
+- Upgraded github.com/fsnotify/fsnotify from v1.8.0 to v1.9.0
+
 ## [v0.4.0] - 11/26/2025
 
 ### Changed
