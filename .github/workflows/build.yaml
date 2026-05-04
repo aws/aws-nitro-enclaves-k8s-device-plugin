@@ -4,6 +4,12 @@
 name: build
 
 on: pull_request
+
+# type=gha buildx cache authenticates via ACTIONS_RUNTIME_TOKEN (Actions runtime
+# service), not GITHUB_TOKEN — cache read/write is unaffected by this block.
+# `contents: read` is sufficient for actions/checkout; no extra scopes needed.
+# Refs: https://docs.docker.com/build/cache/backends/gha/
+#       https://github.com/moby/buildkit/blob/master/cache/remotecache/gha/gha.go
 permissions:
    contents: read
 jobs:
@@ -42,7 +48,7 @@ jobs:
       - name: Print image tag
         run: |
           cd scripts
-          bash -c 'source ./common.sh && echo "Resolved image tag: ${IMAGE}" && echo "Resolved builder image: ${BUILDER_IMAGE}"' ./common.sh
+          bash -c 'source ./common.sh && echo "Resolved image tag: ${IMAGE}"'
       - name: Build container images
         env:
           BUILDX_CACHE: --cache-from type=gha --cache-to type=gha,mode=max

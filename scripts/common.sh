@@ -10,7 +10,6 @@ readonly TOP_DIR=$(cd $SCRIPTS_DIR/.. && pwd)
 readonly ECR_CONFIG_FILE_PATH="$SCRIPTS_DIR/.ecr.uri"
 readonly RELEASE_FILE="RELEASE"
 
-readonly BUILDER_IMAGE=ne-k8s-device-plugin-build:latest
 readonly REPOSITORY_NAME=aws-nitro-enclaves-k8s-device-plugin
 readonly RELEASE=$(cat $TOP_DIR/$RELEASE_FILE)
 readonly IMAGE=$REPOSITORY_NAME:$RELEASE
