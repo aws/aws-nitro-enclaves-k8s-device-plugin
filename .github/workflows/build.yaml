@@ -4,6 +4,14 @@
 name: build
 
 on: pull_request
+
+# type=gha buildx cache authenticates via ACTIONS_RUNTIME_TOKEN (Actions runtime
+# service), not GITHUB_TOKEN — cache read/write is unaffected by this block.
+# `contents: read` is sufficient for actions/checkout; no extra scopes needed.
+# Refs: https://docs.docker.com/build/cache/backends/gha/
+#       https://github.com/moby/buildkit/blob/master/cache/remotecache/gha/gha.go
+permissions:
+   contents: read
 jobs:
   build:
     # this is to prevent the job to run at forked projects
@@ -24,3 +32,24 @@ jobs:
         run: go build -v ./cmd/k8s-device-plugin/k8s-device-plugin.go
       - name: Test
         run: go test -v ./...
+  docker-build:
+    # this is to prevent the job to run at forked projects
+    if: github.repository == 'aws/aws-nitro-enclaves-k8s-device-plugin'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/arm64
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Print image tag
+        run: |
+          cd scripts
+          bash -c 'source ./common.sh && echo "Resolved image tag: ${IMAGE}"'
+      - name: Build container images
+        env:
+          BUILDX_CACHE: --cache-from type=gha --cache-to type=gha,mode=max
+        run: ./scripts/build_docker.sh
