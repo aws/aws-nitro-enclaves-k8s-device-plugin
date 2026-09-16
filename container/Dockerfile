@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Build the device plugin from sources
-FROM amazonlinux:2023 as builder
+FROM amazonlinux:2023 AS builder
 
-RUN dnf install golang-1.25.8 -y
+RUN dnf install golang-1.26.7 -y
 
 WORKDIR build_dir/
 COPY go.mod go.sum ./
@@ -23,7 +23,7 @@ RUN VERSION=$(tr -d '[:space:]' < RELEASE) && \
       -o k8s-ne-device-plugin ./cmd/k8s-device-plugin
 
 # Create a bare minimum image that only contains the device plugin binary.
-FROM scratch as device_plugin
+FROM scratch AS device_plugin
 
 COPY --from=builder /build_dir/k8s-ne-device-plugin /usr/bin/k8s-ne-device-plugin
 
