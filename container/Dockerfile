@@ -4,7 +4,7 @@
 # Build the device plugin from sources
 FROM amazonlinux:2023 AS builder
 
-RUN dnf install golang-1.26.7 -y
+RUN dnf install golang-1.26.8 -y
 
 WORKDIR build_dir/
 COPY go.mod go.sum ./
