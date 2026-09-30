@@ -153,7 +153,7 @@ func (nedp *NitroEnclavesDevicePlugin) Allocate(ctx context.Context, reqs *plugi
 			},
 		}
 
-		for _, id := range req.DevicesIDs {
+		for _, id := range req.DevicesIds {
 			glog.V(1).Info("Allocation request for device ID: ", id)
 		}
 
