@@ -162,7 +162,7 @@ func (necdp *NitroEnclavesCPUDevicePlugin) Allocate(ctx context.Context, reqs *p
 	for _, req := range reqs.ContainerRequests {
 		responses.ContainerResponses = append(responses.ContainerResponses, &pluginapi.ContainerAllocateResponse{
 			Envs: map[string]string{
-				"NITRO_ENCLAVES_CPUS": strconv.Itoa(len(req.DevicesIDs)),
+				"NITRO_ENCLAVES_CPUS": strconv.Itoa(len(req.DevicesIds)),
 			},
 		})
 	}
