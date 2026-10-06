@@ -2,6 +2,32 @@
 
 All notable changes to the AWS Nitro Enclaves Kubernetes Device Plugin will be documented in this file.
 
+## [v0.4.2] - 10/06/2026
+
+### Added
+- CI `docker-build` job using QEMU, Buildx, and GitHub Actions cache
+- Unit test for the `-version` flag with ldflags injection
+
+### Changed
+- Updated Go toolchain from 1.25.8 to 1.26.8 to address reported vulnerabilities
+- `build_docker.sh` now uses `docker buildx build` with parallel x86_64/aarch64 builds, configurable via `BUILDX_LOAD` / `BUILDX_CACHE` (defaults set in `release.sh`)
+- Removed unused `BUILDER_IMAGE` from `common.sh`
+- Dockerfile uses uppercase `AS` in multi-stage `FROM` lines
+- Renamed `ContainerAllocateRequest.DevicesIDs` to `DevicesIds` in both device plugins, following the kubelet device plugin API regeneration
+- Updated Helm chart version to 0.4.2
+- Updated app version to 0.4.2
+
+### Dependencies
+- Upgraded k8s.io/kubelet from v0.33.10 to v0.37.1
+- Upgraded google.golang.org/grpc from v1.79.3 to v1.84.0
+- Upgraded golang.org/x/net from v0.52.0 to v0.59.0
+- Upgraded golang.org/x/sys from v0.43.0 to v0.48.0
+- Upgraded golang.org/x/text from v0.35.0 to v0.42.0
+- Upgraded google.golang.org/protobuf from v1.36.10 to v1.36.12
+- Upgraded github.com/fsnotify/fsnotify from v1.9.0 to v1.10.1
+- Replaced google.golang.org/genproto with google.golang.org/genproto/googleapis/rpc
+- Dropped github.com/gogo/protobuf (no longer required by kubelet)
+
 ## [v0.4.1] - 04/22/2026
 
 ### Added
