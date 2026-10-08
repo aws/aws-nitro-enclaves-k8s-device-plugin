@@ -299,7 +299,7 @@ func NewNitroEnclavesCPUDevicePlugin(config *config.PluginConfig) *NitroEnclaves
 				Health: pluginapi.Healthy,
 			})
 		}
-		glog.V(0).Infof("Reserved CPUs for encalves added: %v", availableCPUsOnInstance)
+		glog.V(0).Infof("Reserved CPUs for enclaves added: %v", availableCPUsOnInstance)
 	}
 
 	return &NitroEnclavesCPUDevicePlugin{
